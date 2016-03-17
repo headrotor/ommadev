@@ -220,25 +220,37 @@ class Ommahard(Ommatid):
         self.numLEDs = 80
         # array of pixels
         self.px = [ [0,0,0] ] * self.numLEDs
-        #self.set_HSVsphere(0)
+        self.set_HSVsphere(0)
         self.init_cmap()
 
     def init_cmap(self):
         """ map pixel and sensor index to channel (logical) index."""
+
+
         self.cmap = []
+        for qf in self.qfaces:
+            qf.a = 'x'
+
+        self.qfaces[0].a = 'A'
+
+        for n, qf in enumerate(self.qfaces):
+            if qf.a != 'x':
+                print "MAP: i:%02d n%02d -- %s" % (qf.i, n, qf.a)
+        
         #for f in 'abcdefghijklmnopqrs':
         #    for i in range(4):
         #        c = 4*self.face2n(f) + i
         #        print "mapping index %d to chan %d" % (i, c)
 
         i = 0
-        for qf in self.qfaces:
-            # qf is quadface
-            for c in qf.f:
-                self.cmap.append(c.i)
-                print "mapping index %d to chan %d" % (i, c.i)
-                i = i + 1
-        
+        # for qf in self.qfaces:
+        #     # qf is quadface
+        #     for c in qf.f:
+        #         self.cmap.append(c.i)
+        #         print "mapping index %d to chan %d" % (i, c.i)
+        #         i = i + 1
+
+                
     def set_HSVsphere(self,offset):
         """ color chan according to HSV, map longitude to hue,
         latitude to saturation. Subclass of ommatid """     
@@ -382,13 +394,15 @@ if __name__ == '__main__':
     mode_count = 0
     omma.swoop()
     faces = 'abcdefghijklmnopqrs'
-
+    phase_advance = 0.0
     while(True):
         # one method: subtract mean of "off" channels
         # these are good
         delay = 0.0010
         frame_delay = 0.00
 
+        omma.set_HSVsphere(phase_advance)        
+        phase_advance += 0.05
         g = 0 # global index
         for f in faces:
 
@@ -439,7 +453,47 @@ if __name__ == '__main__':
         ########## OK got sensor value in pv[c], mapped to pixels[c]
         ## use ommamap to get channel i for index c
 
+        # for c in omma.chan:
+        #     #print "setting chan %d to color %s" % (c.i, str(c.c)) 
+        #     pixels[c.i] = [255* n for n in c.c]
+
+        for qf in omma.qfaces:
+            # sum rangemap for this face
+            fv = 0
+            for n, ch in enumerate(qf.f):
+                c = ch.i
+                #print "ch %d %s" % (ch.i, n)
+                #pixels[c] = ch.c
+                fv += float(rm[c])
+                fv = int(fv/3)
+                if qf.a == 'A':
+                    pixels[4*qf.i + 0] = (255,255,255)
+                    pixels[4*qf.i + 1] = (255,255,255)
+                    pixels[4*qf.i + 2] = (255,255,255)
+                    pixels[4*qf.i + 3] = (255,255,255)
+                else:
+                    pixels[4*qf.i + 0] = (0,0,0)
+                    pixels[4*qf.i + 1] = (0,0,0)
+                    pixels[4*qf.i + 2] = (0,0,0)
+                    pixels[4*qf.i + 3] = (0,0,0)
+
+
+
         if mode == 0: # white draw
+            for qf in omma.qfaces:
+                # sum rangemap for this face
+                fv = 0
+                for n, ch in enumerate(qf.f):
+                    c = ch.i
+                    #print "ch %d %s" % (ch.i, n)
+                    #pixels[c] = ch.c
+                    fv = float(rm[c])
+                    if fv > 20:
+                        print "i:%02d f:%02d n:%02d" % (ch.i,n,qf.i)
+                        pixels[ch.i] = (255,255,255)
+
+
+        elif mode == 1 and False: # white draw
             for qf in omma.qfaces:
                 # sum rangemap for this face
                 fv = 0
@@ -455,6 +509,7 @@ if __name__ == '__main__':
                 pixels[4*qf.i + 1] = (fv, 0,  0)
                 pixels[4*qf.i + 2] = (0, 0, fv)
                 pixels[4*qf.i + 3] = (0, 0, fv)
+
                 # for n, ch in enumerate(qf.f):
                 #     c = ch.i
                 #     pixels[c] = (0, fv, 0)
