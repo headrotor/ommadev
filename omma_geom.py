@@ -108,7 +108,9 @@ class subFace:
         self.nv.unitize()  # normalize to get unit vector
           # spherical coordinates of this face
         self.th = acos(self.nv.z)
+        self.lat = self.th # latitide
         self.ph = atan2(self.nv.x, self.nv.y)
+        self.lng = self.ph
         # indices of neighbors sharing sides (added later)
         self.en = None
         # list of neighboring subfaces
@@ -218,6 +220,62 @@ class Ommatid:
             c.n.append(self.chan[i])
         print "neighbors: " + str(c.en)
 
+    def find_lat_long(self):
+        """ compute lists of all faces with similar latutudes and lng"""
+        import itertools
+        self.lats = [] # list of lists of same-lat faces
+        self.lngs = [] # list of lists of same-long faces
+        # only need to search first half of channel list
+        #for c in itertools.islice(self.chan, 40):
+        for c in self.chan:
+            l_lats = self.find_lat(c)
+            l_lats = sorted(l_lats, key=lambda chan: chan.i)
+            # is this a duplicate?
+            foundit = False
+            #print "new l_lats " + str([c.i for c in l_lats])
+            for l in self.lats:
+                #print "checking: " + str([c.i for c in l])
+                if l[:] == l_lats[:]:
+                    #print "found: " + str([c.i for c in l_lats])
+                    foundit = True
+            if foundit is False:
+                self.lats.append(l_lats)
+                #print "new lat: " + str([c.i for c in l_lats])
+            #else:
+                #print "skipped"
+
+            l_lngs = self.find_lng(c)
+            l_lngs = sorted(l_lngs, key=lambda chan: chan.i)
+            # if this is not a duplicate, add to list
+            foundit = False
+            for l in self.lngs:
+                if l[:] == l_lngs[:]:
+                    foundit = True
+            if foundit is False:
+                self.lngs.append(l_lngs)
+                print "new lng: " + str([c.i for c in l_lngs])
+            else:
+                print "skipped lng"
+
+
+                
+    def find_lat(self, c):
+        """ return a list of all the channels with same latitude """
+        same_lat = []
+        for c2 in self.chan:
+            if abs(c.lat - c2.lat) < 0.1:
+                same_lat.append(c2)
+        return same_lat
+        
+
+    def find_lng(self, c):
+        """ return a list of all the channels with same longitude """
+        same_lng = []
+        for c2 in self.chan:
+            if abs(c.lng - c2.lng) < 0.1:
+                same_lng.append(c2)
+        return same_lng
+
     def add_qface(self, vi1, vi2, vi3):
         """ given 3 vertex indexes, add the quadface"""
 
@@ -292,15 +350,16 @@ class Ommatid:
         for i, c in enumerate(self.chan):
             c.i = i
 
-#         for qf in self.qfaces:
-#             self.find_adjacent(qf)
-
+        self.find_lat_long()
+        
         for c in self.chan:
             self.find_adjacent(c)
-
+            
         for i in range(4):
             self.chan[i].printme()
+            
 
+            
     def set_HSVsphere(self,offset):
         """ color chan according to HSV, map longitude to hue,
         latitude to saturation """     

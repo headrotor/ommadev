@@ -14,6 +14,11 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
+Source: 
+http://home.wlu.edu/~levys/software/kbhit.py
+via
+https://stackoverflow.com/questions/18240016/detect-keypress-without-blocking
+
 '''
 
 import os
