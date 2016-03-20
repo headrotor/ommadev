@@ -406,7 +406,8 @@ if __name__ == '__main__':
     omma.swoop()
     faces = 'abcdefghijklmnopqrs'
     phase_advance = 0.0
-    int_count = 0 # interactive count
+    lat_count = 0 # interactive count
+    lng_count = 0 # interactive count
     while(True):
         # one method: subtract mean of "off" channels
         # these are good
@@ -487,37 +488,50 @@ if __name__ == '__main__':
         #             pixels[4*qf.i + 2] = (0,0,0)
         #             pixels[4*qf.i + 3] = (0,0,0)
 
+        redpix = -1
         if mode == 0: # light up and report touched face
             
             if kb.kbhit():
                 c = kb.getch()
                 if c == 'n':
-                    int_count += 1
-                    if int_count > 5:
-                        int_count = 0
-                    print "int count" + str(int_count)
-                    print str([c.lat for c in omma.lats[int_count]])
+                    lat_count += 1
+                    if lat_count >= len(omma.lats):
+                        lat_count = 0
+                    print "lat count" + str(lat_count)
+                    print str([c.lat for c in omma.lats[lat_count]])
+                elif c == 'm':
+                    lng_count += 1
+                    if lng_count >= len(omma.lngs):
+                        lng_count = 0
+                    print "lng count" + str(lng_count)
+                    print str([c.lng for c in omma.lngs[lng_count]])
+
                         
 
             for c in omma.chan:
                 pixels[c.i] = (0,0,0)
 
-            for c in omma.lats[int_count]:
-                pixels[c.i] = (0,255,0)
-                
-                    
-            # for qf in omma.qfaces:
-            #     # sum rangemap for this face
-            #     fv = 0
-            #     for n, ch in enumerate(qf.f):
-            #         c = ch.i
-            #         #print "ch %d %s" % (ch.i, n)
-            #         #pixels[c] = ch.c
-            #         fv = float(rm[c])
-            #         if fv > 20:
-            #             print "chan:%02d face N:%02d face:%02d" % (ch.i,n,qf.i)
-            #             print "chan:%02d face N:%02d face:%02d" % (ch.i,n,qf.i)
-            #             pixels[ch.i] = (255,255,255)
+            for c in omma.lats[lat_count]:
+                if c in omma.lngs[lng_count]:
+                    pixels[c.i] = (255,0,0)
+                    redpix = c.i
+                else:
+                    pixels[c.i] = (0,255,0)                    
+
+            for qf in omma.qfaces:
+                # sum rangemap for this face
+                fv = 0
+                for n, ch in enumerate(qf.f):
+                    c = ch.i
+                    #print "ch %d %s" % (ch.i, n)
+                    #pixels[c] = ch.c
+                    fv = float(rm[c])
+                    if fv > 80:
+                        print "chan:%02d face N:%02d face:%02d" % (ch.i,n,qf.i)
+                        if redpix > -1:
+                            print "redpix %d, lat: %f long: %f" % (redpix, omma.chan[redpix].lat, omma.chan[redpix].lng)
+
+                        pixels[ch.i] = (255,255,255)
 
                         
 

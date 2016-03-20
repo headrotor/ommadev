@@ -243,7 +243,10 @@ class Ommatid:
                 #print "new lat: " + str([c.i for c in l_lats])
             #else:
                 #print "skipped"
-
+                
+            # now sort by lat
+            self.lats = sorted(self.lats, key = lambda chan: chan[0].lat)
+            ##############################################
             l_lngs = self.find_lng(c)
             l_lngs = sorted(l_lngs, key=lambda chan: chan.i)
             # if this is not a duplicate, add to list
@@ -256,6 +259,7 @@ class Ommatid:
                 print "new lng: " + str([c.i for c in l_lngs])
             else:
                 print "skipped lng"
+            self.lngs = sorted(self.lngs, key = lambda chan: chan[0].lng)
 
 
                 
