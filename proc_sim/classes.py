@@ -186,6 +186,9 @@ class Ommatid:
         for f in self.chan:
             f.init_UV()
 
+
+
+
     def find_adjacent(self, c):
         from collections import Counter
         """ find adjacent chan faces by comparing vertices"""
