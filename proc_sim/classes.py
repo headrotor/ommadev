@@ -41,7 +41,7 @@ class Quadface:
         vb.unitize()
         vc.unitize()
         self.v = [va, vb, vc]
-        self.vi = [va.i, vb.i, vc.i]  # vector indexes for comparing sides
+        #self.vi = [va.i, vb.i, vc.i]  
         self.f = []  # list of subfaces
         self.i = -1  # index such that qfaces[i]=this
 
@@ -161,7 +161,30 @@ class subFace:
             l += n.V
         return l
 
+    # wave equation
+    def init_wave(self):
+        # if self.i < 20:
+        self.U = 0.0 
+        #self.V = 0 + random(-0.5, 0.5)
+        self.V = 0
 
+
+    def update_wave(self, damp=0.999):
+        if self.i == 0:
+            print "iter: nv %f  V %f  U %f" % (self.nextV, self.V, self.U)
+        self.U =  self.V
+        self.V = damp * self.nextV    
+ 
+
+    # http://www.mtnmath.com/whatrh/node66.html
+    def iter_wave(self):
+        speed = 0.1
+        V = speed * speed * (self.lapV())
+        V += 2.0 * self.V
+        # print "V2:" + str(V)
+        # U is [t-1] term
+        V -= self.U
+        self.nextV = V
 
 
     def printme(self):
@@ -175,12 +198,16 @@ class Ommatid:
 
     """ Ommatid  triangulated icosahedron. 80 faces, subdivided from 20 icosahedral faces"""
 
-    def __init__(self):
+    def __init__(self, order=0):
+
         # Icosahedral vertices, only really need these for construction
+        self.order = order
         self.verts = []
         self.faces = []  # Icosahedral faces, only used for construction
         # quad (icosahedral) faces, each face has 4 subface channels
+
         self.qfaces = []
+        self.sfaces =[] # for subdivided faces
         self.chan = []   # subface channels, each has sensor/RGB
         self.init()
         for f in self.chan:
@@ -281,20 +308,26 @@ class Ommatid:
 
         # make lists of subfaces and vertices
 
-        self.allv = []  # list of all vertices
-        vertex_count = 0
+        # now subdivide each subface
+
         for i, qf in enumerate(self.qfaces):
+            qf.i = i
+            qf.order = 1
+            for sf in qf.f:
+                qf = Quadface(sf.v[0], sf.v[1], sf.v[2])
+                self.sfaces.append(qf)
+
+        #for i, qf in enumerate(self.qfaces):
+
+        for i, qf in enumerate(self.sfaces):
             qf.i = i
             for subface in qf.f:
                 self.chan.append(subface)
-        print "indexed %d vertices" % vertex_count
+
 
         # label channels with index
         for i, c in enumerate(self.chan):
             c.i = i
-
-#         for qf in self.qfaces:
-#             self.find_adjacent(qf)
 
         for c in self.chan:
             self.find_adjacent(c)
@@ -311,7 +344,12 @@ class Ommatid:
         for c in self.chan:
             c.react()
     
-    
+    def iter_wave(self):
+        """compute one iterationof the wave equation"""
+        for c in self.chan:
+            c.iter_wave()
+        for c in self.chan:
+            c.update_wave()
 
 
 

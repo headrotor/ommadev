@@ -17,14 +17,15 @@ def setup():
     cindex = 0
     # if no pickle file, compute ommatid and pickle it
     #if True:
-    om2 = Ommatid()
-    pickle.dump(om2, open( "omma.p", "wb" ) )
+    #om2 = Ommatid()
+    #pickle.dump(om2, open( "omma.p", "wb" ) )
     # else load it from file
     #else:
-    om = pickle.load(open( "omma.p", "rb" ) )
+    #om = pickle.load(open( "omma.p", "rb" ) )
         
+    om = Ommatid(3)
             
-    size(800, 600, P3D)
+    size(600, 600, P3D)
     for f in om.chan:
         f.c = color(0)
     print cindex
@@ -42,13 +43,13 @@ def draw():
     pushMatrix()
     translate(width / 2, height / 2)
     rotation = 0
-    zoom = 8
+    zoom = 4
     rotateY(map(mouseX, 0, width, 0, 2 * PI) + rotation)
     rotateX(map(mouseY, 0, height, 0, 2 * PI))
     scale(width / zoom, width / zoom, width / zoom)
     # box(100)
-    for v in om.verts:
-        draw_vert(v)
+    #for v in om.verts:
+    #    draw_vert(v)
     # for f in faces:
     #  draw_face(f)
     n = 0
@@ -56,8 +57,9 @@ def draw():
     #  draw_face(faces[n + i])
     if mousePressed:
         force_vals()
-    om.gray_scott()
-    for qf in om.qfaces:
+    #om.gray_scott()
+    om.iter_wave()
+    for qf in om.sfaces:
         draw_fface(qf)
     popMatrix()
     # print cc3
@@ -79,13 +81,18 @@ def mouseClickedOLD():
 
 #def mouseClicked():
 
-def force_vals():
+def force_vals_GS():
     global cindex
     om.chan[cindex].U = 1.0
     om.chan[cindex].V = 0.0
     for n in om.chan[cindex].n:
         n.U = 1.0
         n.V = 0.0
+
+def force_vals():
+    om.chan[cindex].V += 100.0
+    if om.chan[cindex].V > 255:
+        om.chan[cindex].V = 255
     
 
 def keyPressed():
@@ -107,10 +114,11 @@ def draw_fface(qf):
     # f.v[0].printme();
     noStroke()
 
-    for f in qf.f:
+    for i, f in enumerate(qf.f):
     # draw this face in its proper color...
-        #fill(f.c)
-        fill(color(f.U*255, 0, f.V*255));
+        #fill(color(f.U*255, 0, f.V*255));
+        sc = 2.0
+        fill(color(sc*f.V, 80, 255-(sc*f.V)));
         beginShape(TRIANGLE_STRIP)
         for j in range(3):
             vertex(f.v[j].x, f.v[j].y, f.v[j].z)
