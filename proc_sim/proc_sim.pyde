@@ -16,14 +16,14 @@ def setup():
     #globals, ugly but need them here
     cindex = 0
     # if no pickle file, compute ommatid and pickle it
-    #if True:
-    #om2 = Ommatid()
-    #pickle.dump(om2, open( "omma.p", "wb" ) )
-    # else load it from file
-    #else:
-    #om = pickle.load(open( "omma.p", "rb" ) )
-        
-    om = Ommatid(3)
+    if True:
+        om = Ommatid(3)
+        pickle.dump(om, open( "omma.p", "wb" ) )
+        print "dumping pickle file"
+        # else load it from file
+    else:
+        om = pickle.load(open( "omma.p", "rb" ) )
+        print "reading pickle file"
             
     size(600, 600, P3D)
     for f in om.chan:
@@ -44,23 +44,26 @@ def draw():
     translate(width / 2, height / 2)
     rotation = 0
     zoom = 4
-    rotateY(map(mouseX, 0, width, 0, 2 * PI) + rotation)
+    rotateX(PI/2)
+    rotateZ(map(mouseX, 0, width, 0, 2 * PI) + rotation)
     rotateX(map(mouseY, 0, height, 0, 2 * PI))
     scale(width / zoom, width / zoom, width / zoom)
     # box(100)
-    #for v in om.verts:
-    #    draw_vert(v)
+    for v in om.verts:
+        #v.rot(map(mouseX, 0, width, 0, 2 * PI), 0,1,0)
+        draw_vert(v)
     # for f in faces:
     #  draw_face(f)
     n = 0
-    # for i in range(20):
-    #  draw_face(faces[n + i])
+    draw_zboxes()
+    draw_yboxes()
     if mousePressed:
         force_vals()
     #om.gray_scott()
     om.iter_wave()
-    for qf in om.sfaces:
-        draw_fface(qf)
+    for qf in om.qfaces:
+        #draw_fface(qf)
+        draw_qface(qf)
     popMatrix()
     # print cc3
 
@@ -108,6 +111,22 @@ def draw_vert(v):
     translate(v.x, v.y, v.z)
     box(0.1)
     popMatrix()
+    
+def draw_zboxes():
+    for i in range(100):
+        pushMatrix()
+        translate(0, 0, (i-50)*.2)
+        box(0.1)
+        popMatrix()
+
+def draw_yboxes():
+    for i in range(100):
+        pushMatrix()
+        translate(0, (i-50)*.12, 0)
+        fill(0,0,128)
+        box(0.1)
+        popMatrix()
+        
 
 def draw_fface(qf):
     # textureMode(NORMAL);
@@ -126,18 +145,19 @@ def draw_fface(qf):
         endShape()
 
 
-def draw_face(f):
+def draw_qface(qf):
 
+    fill(128)
     beginShape(TRIANGLE_STRIP)
     # noStroke();
     # vertex(f.v[0].x,f.v[0].y,f.v[0].z);
     # vertex(f.v[1].x,f.v[1].y,f.v[1].z);
     # vertex(f.v[2].x,f.v[2].y,f.v[2].z);
     # vertex(f.v[0].x,f.v[0].y,f.v[0].z);
-    vertex(verts[f.v[0]].x, verts[f.v[0]].y, verts[f.v[0]].z)
-    vertex(verts[f.v[1]].x, verts[f.v[1]].y, verts[f.v[1]].z)
-    vertex(verts[f.v[2]].x, verts[f.v[2]].y, verts[f.v[2]].z)
-    vertex(verts[f.v[0]].x, verts[f.v[0]].y, verts[f.v[0]].z)
+    vertex(qf.v[0].x, qf.v[0].y, qf.v[0].z)
+    vertex(qf.v[1].x, qf.v[1].y, qf.v[1].z)
+    vertex(qf.v[2].x, qf.v[2].y, qf.v[2].z)
+    vertex(qf.v[0].x, qf.v[0].y, qf.v[0].z)
 
     endShape()
     # f.printme()

@@ -29,6 +29,17 @@ class Vertex(object):
     def printme(self):
         print "vertex index %d %f %f %f" % (self.i, self.x, self.y, self.z)
 
+        
+    def rot(self, a, l, m, n):
+        """ rotate this vector through angle a
+        around axis l, m, n """
+        # axis should be unit vector
+        x, y, z = self.x, self.y, self.z
+        # could do this so much better in numpy!
+        self.x = x*cos(a) + (1 - cos(a))*(l*l*x + l*m*y + l*n*z) + (m*z - n*y)*sin(a)
+        self.y = y*cos(a) + (1 - cos(a))*(m*l*x + m*m*y + m*n*z) + (n*x - l*z)*sin(a)
+        self.z = z*cos(a) + (1 - cos(a))*(n*l*x + n*m*y + n*n*z) + (l*y - m*x)*sin(a)
+       
 
 #""" face divided into four subfaces """
 # call with 3 corner Vertexes of icosahedral face
@@ -40,6 +51,7 @@ class Quadface:
         va.unitize()
         vb.unitize()
         vc.unitize()
+        # pre-rotate so top, bottom plane parallel to xy axis
         self.v = [va, vb, vc]
         #self.vi = [va.i, vb.i, vc.i]  
         self.f = []  # list of subfaces
@@ -170,7 +182,7 @@ class subFace:
 
 
     def update_wave(self, damp=0.999):
-        if self.i == 0:
+        if self.i == 0 and False:
             print "iter: nv %f  V %f  U %f" % (self.nextV, self.V, self.U)
         self.U =  self.V
         self.V = damp * self.nextV    
@@ -276,6 +288,9 @@ class Ommatid:
         # add indexes
         for i, v in enumerate(self.verts):
             v.i = i
+            # pre-rotate so planes are parallel
+            v.rot(20*PI/180, 0,1,0)
+
             # v.printme()
 
         # 5 faces around point 0
@@ -309,17 +324,17 @@ class Ommatid:
         # make lists of subfaces and vertices
 
         # now subdivide each subface
+        if False:
+            for i, qf in enumerate(self.qfaces):
+                qf.i = i
+                qf.order = 1
+                for sf in qf.f:
+                    qf = Quadface(sf.v[0], sf.v[1], sf.v[2])
+                    self.sfaces.append(qf)
 
         for i, qf in enumerate(self.qfaces):
-            qf.i = i
-            qf.order = 1
-            for sf in qf.f:
-                qf = Quadface(sf.v[0], sf.v[1], sf.v[2])
-                self.sfaces.append(qf)
 
-        #for i, qf in enumerate(self.qfaces):
-
-        for i, qf in enumerate(self.sfaces):
+        #for i, qf in enumerate(self.sfaces):
             qf.i = i
             for subface in qf.f:
                 self.chan.append(subface)
