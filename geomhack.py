@@ -442,7 +442,10 @@ if __name__ == '__main__':
     board_lats = [[5],[0, 15, 16],[1,4,6,8,10,11],[2,3,12,14,17,19],[7,9,13]]
 
     
-    # map pixels to actual face indexes
+    # inverse map of logical board map to physical board map
+    # board_map[i] = b where i is physical address and b is logical address
+    # that is, omma.qfaces[b] has physical address (face address) i. 
+
     board_map = {i:-1 for i in range(20)}
 
     # top board
@@ -475,11 +478,71 @@ if __name__ == '__main__':
     board_map[13] = 10
     
     # bottom board 18 is not used
-    for l in range(19):
-        b = board_map[l]
-        qf = omma.qfaces[b]
-        print "l %d l: %d b: %d lng %f " % (qf.i, l, b, r2d(qf.lng))
 
+    # invert board map such that ib[i] = b 
+    # ib_map = {v: k for k, v in board_map.items()}
+
+    for i in range(19):
+        b = board_map[i]
+        qf = omma.qfaces[b]
+        qf.bm = b # board map
+        print "lb %2d i: %2d qf.i: %2d lat: %f lng %f " % (qf.bm, i, qf.i, r2d(qf.lat), r2d(qf.lng))
+
+    #print repr(ib_map)
+    #print repr(board_map)
+    
+    for blist in board_lats:
+        for b in blist:
+            qf = omma.qfaces[b]
+            for n, ch in enumerate(qf.f):
+                ch.bm = b # board map, logical index
+                ch.pi = qf.i # actual physical board index 
+                ch.n = n # logical position on board
+            
+    # for i in chan_map:
+    #     ch = omma.chan[i]
+       #print "chan: %d bm: %d pi %d n%d lat: %f long: %f"  % (ch.i, ch.bm, ch.pi, ch.n, r2d(ch.lat), r2d(ch.lng))
+        
+    chan_map = {i:-1 for i in range(20)}
+
+    chan_lats = [[21],
+                 [22, 20, 23],
+                 [3, 60, 63, 66, 2, 67]
+                 [65, 1, 61],
+                 [67, 2, 3, 63, 60, 66],
+                 []]
+
+    chan_map[21] = 0 
+
+    chan_map[22] = 3 
+    chan_map[20] = 2 
+    chan_map[23] = 1
+
+    chan_map[3]  = 3 
+    chan_map[60] = 2 
+    chan_map[63] = x
+    chan_map[66] = x
+    chan_map[2]  = x 
+    chan_map[67] = x 
+
+    chan_map[65]  = x
+    chan_map[1]   = x
+    chan_map[61]  = x 
+
+    
+    for c in range(76):
+        try:
+            i = chan_map[c]
+        except KeyError:
+            i = -1
+        if i >= 0:
+            ch = omma.chan[i]
+            ch.pi = c
+            print "chan: %d bm: %d pi %d n%d lat: %f long: %f"  % (ch.i, ch.bm, ch.pi, ch.n, r2d(ch.lat), r2d(ch.lng))
+    
+
+    exit(0)
+        
     while(True):
         # one method: subtract mean of "off" channels
         # these are good
