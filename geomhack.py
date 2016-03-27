@@ -222,7 +222,7 @@ class Ommahard(Ommatid):
         # array of pixels
         self.px = [ [0,0,0] ] * self.numLEDs
         self.set_HSVsphere(0)
-        #self.print_lats()
+        self.print_lats()
         self.init_cmap()
 
     def r2d(self,r):
@@ -231,7 +231,7 @@ class Ommahard(Ommatid):
     def print_lats(self):
          for qf in self.qfaces:
             print "board %d lat: %f long: %f " % (qf.i, self.r2d(qf.lat), self.r2d(qf.lng))
-            if qf.i == 5:
+            if qf.i == 5 or False:
                 for f in qf.f:
                     print "face %d lat: %f long: %f " % (f.i, self.r2d(f.lat), self.r2d(f.lng))
         
@@ -352,6 +352,9 @@ class Ommahard(Ommatid):
     def hsv2rgb(self,h,s,v):
         return tuple(i * 255 for i in colorsys.hsv_to_rgb(h/255.0,s/255.0,v/255.0))
 
+def r2d(r):
+    return 180*r/math.pi
+
 
 if __name__ == '__main__':
     import kbhit
@@ -377,7 +380,7 @@ if __name__ == '__main__':
 
 
     # if no pickle file, compute ommatid and pickle it
-    if True:
+    if False:
         omma = Ommahard()
         pickle.dump(omma, open( "ommah.p", "wb" ) )
         print "saving pickle"
@@ -436,38 +439,46 @@ if __name__ == '__main__':
     board_count0 = 0
     board_count1 = 0
 
-    #face_lats = [[5,15],[8,19],[0,6,10,16],[1,11],[4,14],[2,12],[3,13],[9,18],[7,17]]
-    board_lats = [[5,15],[8],[0,6,10,16],[1,11],[4,14,2,12], [3,13, 9,18],[7,17]]
-    #face_longs = [[17],[16],[8],[9],[4],[0,3],[5],[1,2],[7],[6],[19],[18],[14],[10,13],[15],[11,12]]
-    board_lngs = [[17],[16],[8],[9],[4],[0,3],[5],[1,2],[7],[6],[18],[14],[10,13],[15],[11,12]]
+    board_lats = [[5],[0, 15, 16],[1,4,6,8,10,11],[2,3,12,14,17,19],[7,9,13]]
 
+    
     # map pixels to actual face indexes
-    board_map = {i:18 for i in range(19)}
-    # top two boards 
+    board_map = {i:-1 for i in range(20)}
+
+    # top board
     board_map[5] = 0
+
+    #top ring of three
+    board_map[0] = 7
     board_map[15] = 1
-    # next four
-    board_map[0] = 2
-    board_map[6] = 4
-    board_map[10] = 9
-    board_map[16] = 7
-    # next two
-    board_map[1]  = 3
-    board_map[11] = 8
+    board_map[16] = 4
 
-    board_map[4]  = 15
-    board_map[14] = 14
-    
-    board_map[2]  = 5
-    board_map[12] = 6
-    
-    board_map[3]  = 17
-    board_map[13] = 11
+    #upper ring of six
+    board_map[1]  = 8
+    board_map[4]  = 9
+    board_map[6]  = 2
+    board_map[8]  = 3
+    board_map[10] = 5
+    board_map[11] = 6
 
-    board_map[9]  = 12
-    board_map[18] = 18
-    
+    #lower ring of six
+    board_map[2]  = 17
+    board_map[3]  = 15
+    board_map[12] = 14
+    board_map[14] = 12
+    board_map[17] = 11
+    board_map[19] = 18
 
+    # bottom ring of three
+    board_map[7]  = 16
+    board_map[9]  = 13
+    board_map[13] = 10
+    
+    # bottom board 18 is not used
+    for l in range(19):
+        b = board_map[l]
+        qf = omma.qfaces[b]
+        print "l %d l: %d b: %d lng %f " % (qf.i, l, b, r2d(qf.lng))
 
     while(True):
         # one method: subtract mean of "off" channels
@@ -504,7 +515,7 @@ if __name__ == '__main__':
                     for i in range(4):
                         c = starti + i
                         # accumulate long-term average
-                        if clean < 10: # initialize at startup
+                        if clean < 30: # initialize at startup
                             sa[c] = svals[i]
                         else:
                             sa[c] = tc*float(sa[c]) + (1 - tc)*float(svals[i])
@@ -576,12 +587,16 @@ if __name__ == '__main__':
                     if board_count0 >= len(board_lats):
                         board_count0 = 0
                     print "b0 count " + str(board_count0)
+                    board_count1 = 0
+
                 elif c == 'x':
                     print_hit = True
                     board_count1 += 1
-                    if board_count1 >= len(board_lngs):
+                    if board_count1 >= len(board_lats[board_count0]):
                         board_count1 = 0
-                    print "b1 count " + str(board_count1)                        
+                    b = board_lats[board_count0][board_count1]    
+                    qf = omma.qfaces[b]
+                    print "b1: %2d i %2d b: %2d lng %f " % (board_count1, qf.i, b, r2d(qf.lng)) 
 
             for c in omma.chan:
                 pixels[c.i] = (0,0,0)
@@ -604,12 +619,12 @@ if __name__ == '__main__':
                     if n == 1:
                         pixels[ch.i] = (128,0,128)
 
-            for b in board_lngs[board_count1]:
-                qf = omma.qfaces[board_map[b]]
-                for n, ch in enumerate(qf.f):
-                    pixels[ch.i] = (0,0,128)
-                    if n == 0:
-                        pixels[ch.i] = (255, 0 ,0)
+            b = board_lats[board_count0][board_count1]
+            qf = omma.qfaces[board_map[b]]
+            for n, ch in enumerate(qf.f):
+                #pixels[ch.i] = (0,0,128)
+                if n == 0:
+                    pixels[ch.i] = (255, 0 ,0)
 
             for qf in omma.qfaces:
                 # sum rangemap for this face
@@ -671,8 +686,8 @@ if __name__ == '__main__':
             mode_count = 255
 
         clean += 1
-        if clean > 10:
-            clean = 10;
+        if clean > 100:
+            clean = 100;
 
         #print str(GPIO.input(40))
         if GPIO.input(40) == 0:
