@@ -222,16 +222,18 @@ class Ommahard(Ommatid):
         # array of pixels
         self.px = [ [0,0,0] ] * self.numLEDs
         self.set_HSVsphere(0)
-        self.print_lats()
+        #self.print_lats()
         self.init_cmap()
 
     def r2d(self,r):
         return 180*r/math.pi
 
     def print_lats(self):
-        for qf in self.qfaces:
-            f = qf.f[0]
-            print "board %d lat: %f long: %f " % (qf.i, self.r2d(f.lat), self.r2d(f.lng))
+         for qf in self.qfaces:
+            print "board %d lat: %f long: %f " % (qf.i, self.r2d(qf.lat), self.r2d(qf.lng))
+            if qf.i == 5:
+                for f in qf.f:
+                    print "face %d lat: %f long: %f " % (f.i, self.r2d(f.lat), self.r2d(f.lng))
         
     def init_cmap(self):
         """ map pixel and sensor index to channel (logical) index."""
@@ -375,7 +377,7 @@ if __name__ == '__main__':
 
 
     # if no pickle file, compute ommatid and pickle it
-    if False:
+    if True:
         omma = Ommahard()
         pickle.dump(omma, open( "ommah.p", "wb" ) )
         print "saving pickle"

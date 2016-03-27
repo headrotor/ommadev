@@ -1,6 +1,10 @@
 from math import sqrt
 from math import acos
 from math import atan2
+from math import cos
+from math import sin
+from math import pi
+
 
 """ holds data for a face corner, assumed to be at sphere surface """
 class Vertex(object):
@@ -32,6 +36,16 @@ class Vertex(object):
     def printme(self):
         print "vertex index %d %f %f %f" % (self.i, self.x, self.y, self.z)
 
+    def rot(self, a, l, m, n):
+        """ rotate this vector through angle a
+        around axis l, m, n. Uses Rodrigues' formula """
+        # axis should be unit vector
+        x, y, z = self.x, self.y, self.z
+        # could do this so much better in numpy!
+        self.x = x*cos(a) + (1 - cos(a))*(l*l*x + l*m*y + l*n*z) + (m*z - n*y)*sin(a)
+        self.y = y*cos(a) + (1 - cos(a))*(m*l*x + m*m*y + m*n*z) + (n*x - l*z)*sin(a)
+        self.z = z*cos(a) + (1 - cos(a))*(n*l*x + n*m*y + n*n*z) + (l*y - m*x)*sin(a)
+
 
 #""" face divided into four subfaces """
 # call with 3 corner Vertexes of icosahedral face
@@ -47,7 +61,15 @@ class Quadface:
         self.vi = [va.i, vb.i, vc.i]  # vector indexes for comparing sides
         self.f = []  # list of subfaces
         self.i = -1  # index such that qfaces[i]=this
+        self.nv = Vertex((va.x + vb.x + vc.x)/3.0,
+                         (va.y + vb.y + vc.y)/3.0,
+                         (va.z + vb.z + vc.z)/3.0)
+        self.nv.unitize()  # normalize to get unit vector
+          # spherical coordinates of this face
+        self.lat = acos(self.nv.z)
+        self.lng = atan2(self.nv.x, self.nv.y)
 
+        
         # now subdivide
         # add midpoint self.v.[3]
         self.add_midpoint_vertex(self.v[0], self.v[1])
@@ -310,7 +332,9 @@ class Ommatid:
         # add indexes
         for i, v in enumerate(self.verts):
             v.i = i
-            # v.printme()
+            # pre-rotate so planes are parallel
+            v.rot((20.905157*pi)/180, 0,1.,0.)
+
 
         # 5 faces around point 0
         self.add_qface(0, 11, 5)
