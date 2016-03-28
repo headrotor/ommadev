@@ -507,36 +507,110 @@ if __name__ == '__main__':
 
     chan_lats = [[21],
                  [22, 20, 23],
-                 [3, 60, 63, 66, 2, 67],
+                 [67, 2, 3, 63, 60, 66],
                  [65, 1, 61],
-                 [67, 2, 3, 63, 60, 66]]
+                 [32, 19, 6, 26,43, 46],
+                 [64, 0, 62],
+                 [33, 17, 5, 25, 41, 45],
+                 [47,35,16,4,27,42]]
+    
 
     print repr(chan_lats)
     
     chan_map[21] = 0 
 
     chan_map[22] = 3 
-    chan_map[20] = 2 
-    chan_map[23] = 1
+    chan_map[20] = 1 
+    chan_map[23] = 2
 
-    chan_map[3]  = 30 
-    chan_map[60] = 5
-    chan_map[63] = 6
-    chan_map[66] = 17
-    chan_map[2]  = 18
     chan_map[67] = 29 
+    chan_map[2]  = 6
+    chan_map[3]  = 5
+    chan_map[63] = 18
+    chan_map[60] = 17
+    chan_map[66] = 30 
 
     chan_map[65]  = 28
     chan_map[1]   = 4
     chan_map[61]  = 16 
 
-    chan_map[67] = 34
-    chan_map[2]  = 38
-    chan_map[3]  = 10
-    chan_map[63] = 14
-    chan_map[60] = 22
-    chan_map[66] = 26
+    chan_map[32] = 33
+    chan_map[19] = 37
+    chan_map[6]  = 9
+    chan_map[26] = 13
+    chan_map[43] = 21
+    chan_map[46] = 25
+
+    chan_map[64]  = 31
+    chan_map[0]   = 7
+    chan_map[62]  = 19 
+
+    chan_map[33] = 34
+    chan_map[17] = 39
+    chan_map[5]  = 10
+    chan_map[25] = 15
+    chan_map[41] = 22
+    chan_map[45] = 27
+
+    chan_map[47] = 35
+    chan_map[35] = 38
+    chan_map[16] = 11
+    chan_map[4]  = 14
+    chan_map[27] = 23
+    chan_map[42] = 26
     
+    # bottom half: reverse longitude
+    chan_lats.append([59,76, 8, 12, 70, 50])
+    chan_map[59] = 68 
+    chan_map[76] = 60
+    chan_map[8]  = 56
+    chan_map[12] = 48
+    chan_map[70] = 44
+    chan_map[50] = 72
+
+    chan_lats.append([48,56,79,10,15,71])
+    chan_map[48] = 71
+    chan_map[56] = 62
+    chan_map[79] = 59
+    chan_map[10] = 50
+    chan_map[15] = 47
+    chan_map[71] = 74
+
+    chan_lats.append([57,77, 9, 13, 69, 49])
+
+    chan_map[57] = 70
+    chan_map[77] = 63
+    chan_map[9]  = 58
+    chan_map[13] = 51
+    chan_map[69] = 46
+    chan_map[49] = 75
+
+    chan_lats.append([52, 30, 36])
+    chan_map[52] = 67
+    chan_map[30] = 55
+    chan_map[36] = 43
+
+    chan_lats.append([58, 78, 11, 14, 68, 51])
+    chan_map[58] = 69
+    chan_map[78] = 61
+    chan_map[11] = 57
+    chan_map[14] = 49
+    chan_map[68] = 45
+    chan_map[51] = 73
+
+    chan_lats.append([29, 53, 37])
+    chan_map[29] = 64
+    chan_map[53] = 52
+    chan_map[37] = 40
+
+    chan_lats.append([55,31, 28, 38, 39, 54])
+    chan_map[55] = 65
+    chan_map[31] = 66
+    chan_map[28] = 53
+    chan_map[38] = 54
+    chan_map[39] = 41
+    chan_map[54] = 42
+
     for c in range(76):
         try:
             i = chan_map[c]
@@ -639,7 +713,7 @@ if __name__ == '__main__':
                     lat_count += 1
                     if lat_count >= len(chan_lats):
                         lat_count = 0
-                    print "lat count " + str(lat_count) + "len " + str(len(chan_lats)) 
+                    print "lat count " + str(lat_count) 
                     #print str([c.lat for c in chan_lats[lat_count]])
                     lng_count = 0
                     print_hit = True
