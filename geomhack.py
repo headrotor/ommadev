@@ -442,7 +442,10 @@ if __name__ == '__main__':
     board_lats = [[5],[0, 15, 16],[1,4,6,8,10,11],[2,3,12,14,17,19],[7,9,13]]
 
     
-    # map pixels to actual face indexes
+    # inverse map of logical board map to physical board map
+    # board_map[i] = b where i is physical address and b is logical address
+    # that is, omma.qfaces[b] has physical address (face address) i. 
+
     board_map = {i:-1 for i in range(20)}
 
     # top board
@@ -475,11 +478,152 @@ if __name__ == '__main__':
     board_map[13] = 10
     
     # bottom board 18 is not used
-    for l in range(19):
-        b = board_map[l]
-        qf = omma.qfaces[b]
-        print "l %d l: %d b: %d lng %f " % (qf.i, l, b, r2d(qf.lng))
 
+    # invert board map such that ib[i] = b 
+    # ib_map = {v: k for k, v in board_map.items()}
+
+    for i in range(19):
+        b = board_map[i]
+        qf = omma.qfaces[b]
+        qf.bm = b # board map
+        print "lb %2d i: %2d qf.i: %2d lat: %f lng %f " % (qf.bm, i, qf.i, r2d(qf.lat), r2d(qf.lng))
+
+    #print repr(ib_map)
+    #print repr(board_map)
+    
+    for blist in board_lats:
+        for b in blist:
+            qf = omma.qfaces[b]
+            for n, ch in enumerate(qf.f):
+                ch.bm = b # board map, logical index
+                ch.pi = qf.i # actual physical board index 
+                ch.n = n # logical position on board
+            
+    # for i in chan_map:
+    #     ch = omma.chan[i]
+       #print "chan: %d bm: %d pi %d n%d lat: %f long: %f"  % (ch.i, ch.bm, ch.pi, ch.n, r2d(ch.lat), r2d(ch.lng))
+        
+    chan_map = {i:-1 for i in range(20)}
+
+    chan_lats = [[21],
+                 [22, 20, 23],
+                 [67, 2, 3, 63, 60, 66],
+                 [65, 1, 61],
+                 [32, 19, 6, 26,43, 46],
+                 [64, 0, 62],
+                 [33, 17, 5, 25, 41, 45],
+                 [47,35,16,4,27,42]]
+    
+
+    print repr(chan_lats)
+    
+    chan_map[21] = 0 
+
+    chan_map[22] = 3 
+    chan_map[20] = 1 
+    chan_map[23] = 2
+
+    chan_map[67] = 29 
+    chan_map[2]  = 6
+    chan_map[3]  = 5
+    chan_map[63] = 18
+    chan_map[60] = 17
+    chan_map[66] = 30 
+
+    chan_map[65]  = 28
+    chan_map[1]   = 4
+    chan_map[61]  = 16 
+
+    chan_map[32] = 33
+    chan_map[19] = 37
+    chan_map[6]  = 9
+    chan_map[26] = 13
+    chan_map[43] = 21
+    chan_map[46] = 25
+
+    chan_map[64]  = 31
+    chan_map[0]   = 7
+    chan_map[62]  = 19 
+
+    chan_map[33] = 34
+    chan_map[17] = 39
+    chan_map[5]  = 10
+    chan_map[25] = 15
+    chan_map[41] = 22
+    chan_map[45] = 27
+
+    chan_map[47] = 35
+    chan_map[35] = 38
+    chan_map[16] = 11
+    chan_map[4]  = 14
+    chan_map[27] = 23
+    chan_map[42] = 26
+    
+    # bottom half: reverse longitude
+    chan_lats.append([59,76, 8, 12, 70, 50])
+    chan_map[59] = 68 
+    chan_map[76] = 60
+    chan_map[8]  = 56
+    chan_map[12] = 48
+    chan_map[70] = 44
+    chan_map[50] = 72
+
+    chan_lats.append([48,56,79,10,15,71])
+    chan_map[48] = 71
+    chan_map[56] = 62
+    chan_map[79] = 59
+    chan_map[10] = 50
+    chan_map[15] = 47
+    chan_map[71] = 74
+
+    chan_lats.append([57,77, 9, 13, 69, 49])
+
+    chan_map[57] = 70
+    chan_map[77] = 63
+    chan_map[9]  = 58
+    chan_map[13] = 51
+    chan_map[69] = 46
+    chan_map[49] = 75
+
+    chan_lats.append([52, 30, 36])
+    chan_map[52] = 67
+    chan_map[30] = 55
+    chan_map[36] = 43
+
+    chan_lats.append([58, 78, 11, 14, 68, 51])
+    chan_map[58] = 69
+    chan_map[78] = 61
+    chan_map[11] = 57
+    chan_map[14] = 49
+    chan_map[68] = 45
+    chan_map[51] = 73
+
+    chan_lats.append([29, 53, 37])
+    chan_map[29] = 64
+    chan_map[53] = 52
+    chan_map[37] = 40
+
+    chan_lats.append([55,31, 28, 38, 39, 54])
+    chan_map[55] = 65
+    chan_map[31] = 66
+    chan_map[28] = 53
+    chan_map[38] = 54
+    chan_map[39] = 41
+    chan_map[54] = 42
+
+    for c in range(76):
+        try:
+            i = chan_map[c]
+        except KeyError:
+            i = -1
+        if i >= 0:
+            ch = omma.chan[c]
+            ch.pi = i
+            print "chan: %d bm: %d pi %d n%d lat: %f long: %f"  % (ch.i, ch.bm, ch.pi, ch.n, r2d(ch.lat), r2d(ch.lng))
+    
+
+    #exit(0)
+        
     while(True):
         # one method: subtract mean of "off" channels
         # these are good
@@ -560,8 +704,6 @@ if __name__ == '__main__':
         #             pixels[4*qf.i + 2] = (0,0,0)
         #             pixels[4*qf.i + 3] = (0,0,0)
 
-        
-        
         redpix = -1
         if mode == 0: # light up and report touched face
             print_hit = False
@@ -569,18 +711,19 @@ if __name__ == '__main__':
                 c = kb.getch()
                 if c == 'n':
                     lat_count += 1
-                    if lat_count >= len(omma.lats):
+                    if lat_count >= len(chan_lats):
                         lat_count = 0
-                    print "lat count " + str(lat_count)
-                    print str([c.lat for c in omma.lats[lat_count]])
+                    print "lat count " + str(lat_count) 
+                    #print str([c.lat for c in chan_lats[lat_count]])
+                    lng_count = 0
                     print_hit = True
                 elif c == 'm':
                     print_hit = True
                     lng_count += 1
-                    if lng_count >= len(omma.lngs):
+                    if lng_count >= len(chan_lats[lat_count]):
                         lng_count = 0
                     print "lng count " + str(lng_count)
-                    print str([c.lng for c in omma.lngs[lng_count]])
+                    #print str([c.lng for c in chan_lats[lng_count]])
                 elif c == 'z':
                     print_hit = True
                     board_count0 += 1
@@ -601,30 +744,29 @@ if __name__ == '__main__':
             for c in omma.chan:
                 pixels[c.i] = (0,0,0)
                 
-            # for c in omma.lats[lat_count]:
-            #     if c in omma.lngs[lng_count]:
-            #         pixels[c.i] = (255,0,0)
-            #         redpix = c.i
-            #         if print_hit:
-            #             print "red index " + str(c.i)
-            #     else:
-            #         pixels[c.i] = (0,255,0)                    
-                    
-            for b in board_lats[board_count0]:
-                qf = omma.qfaces[board_map[b]]
-                for n, ch in enumerate(qf.f):
-                    pixels[ch.i] = (0,0,128)
-                    if n == 0:
-                        pixels[ch.i] = (0,128,128)
-                    if n == 1:
-                        pixels[ch.i] = (128,0,128)
+            # for b in board_lats[board_count0]:
+            #     qf = omma.qfaces[board_map[b]]
+            #     for n, ch in enumerate(qf.f):
+            #         pixels[ch.i] = (0,0,128)
+            #         if n == 0:
+            #             pixels[ch.i] = (0,128,128)
+            #         if n == 1:
+            #             pixels[ch.i] = (128,0,128)
 
-            b = board_lats[board_count0][board_count1]
-            qf = omma.qfaces[board_map[b]]
-            for n, ch in enumerate(qf.f):
-                #pixels[ch.i] = (0,0,128)
-                if n == 0:
-                    pixels[ch.i] = (255, 0 ,0)
+            # b = board_lats[board_count0][board_count1]
+            # qf = omma.qfaces[board_map[b]]
+            # for n, ch in enumerate(qf.f):
+            #     #pixels[ch.i] = (0,0,128)
+            #     if n == 0:
+            #         pixels[ch.i] = (255, 0 ,0)
+
+            for c in chan_lats[lat_count]:
+                ch = omma.chan[chan_map[c]]
+                pixels[ch.i] = (0,0,128)
+
+            c = chan_lats[lat_count][lng_count]
+            ch = omma.chan[chan_map[c]]
+            pixels[ch.i] = (255, 0 ,0)
 
             for qf in omma.qfaces:
                 # sum rangemap for this face
