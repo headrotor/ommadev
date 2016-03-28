@@ -32,7 +32,8 @@ class Vertex(object):
         
     def rot(self, a, l, m, n):
         """ rotate this vector through angle a
-        around axis l, m, n """
+        around axis l, m, n using
+        Rodrigues formula https://en.wikipedia.org/wiki/Rodrigues'_rotation_formula """
         # axis should be unit vector
         x, y, z = self.x, self.y, self.z
         # could do this so much better in numpy!
@@ -190,7 +191,7 @@ class subFace:
 
     # http://www.mtnmath.com/whatrh/node66.html
     def iter_wave(self):
-        speed = 0.1
+        speed = 0.05
         V = speed * speed * (self.lapV())
         V += 2.0 * self.V
         # print "V2:" + str(V)
@@ -324,7 +325,7 @@ class Ommatid:
         # make lists of subfaces and vertices
 
         # now subdivide each subface
-        if False:
+        if True:
             for i, qf in enumerate(self.qfaces):
                 qf.i = i
                 qf.order = 1
@@ -332,9 +333,9 @@ class Ommatid:
                     qf = Quadface(sf.v[0], sf.v[1], sf.v[2])
                     self.sfaces.append(qf)
 
-        for i, qf in enumerate(self.qfaces):
+        #for i, qf in enumerate(self.qfaces):
 
-        #for i, qf in enumerate(self.sfaces):
+        for i, qf in enumerate(self.sfaces):
             qf.i = i
             for subface in qf.f:
                 self.chan.append(subface)

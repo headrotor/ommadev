@@ -7,7 +7,8 @@ import cPickle as pickle
 verts = []
 faces = []
 ffaces = []  # fat faces, each face has subfaces
-
+make_gif = False
+creep = 0
 
 
 def setup():
@@ -16,7 +17,7 @@ def setup():
     #globals, ugly but need them here
     cindex = 0
     # if no pickle file, compute ommatid and pickle it
-    if True:
+    if False:
         om = Ommatid(3)
         pickle.dump(om, open( "omma.p", "wb" ) )
         print "dumping pickle file"
@@ -25,7 +26,7 @@ def setup():
         om = pickle.load(open( "omma.p", "rb" ) )
         print "reading pickle file"
             
-    size(600, 600, P3D)
+    size(400, 400, P3D)
     for f in om.chan:
         f.c = color(0)
     print cindex
@@ -36,36 +37,55 @@ def incr_cc(c):
 def draw():
     global cindex
     global om
+    global make_gif
+    global creep
     background(64)
     textureMode(NORMAL)
     lights()
     noStroke()
     pushMatrix()
     translate(width / 2, height / 2)
-    rotation = 0
-    zoom = 4
+    creep = creep + 0.005
+    zoom = 3
+
     rotateX(PI/2)
-    rotateZ(map(mouseX, 0, width, 0, 2 * PI) + rotation)
+    rotateZ(map(mouseX, 0, width, 0, 2 * PI) + creep)
     rotateX(map(mouseY, 0, height, 0, 2 * PI))
     scale(width / zoom, width / zoom, width / zoom)
     # box(100)
-    for v in om.verts:
+    #for v in om.verts:
         #v.rot(map(mouseX, 0, width, 0, 2 * PI), 0,1,0)
-        draw_vert(v)
+        #draw_vert(v)
     # for f in faces:
     #  draw_face(f)
     n = 0
-    draw_zboxes()
-    draw_yboxes()
+    #draw_zboxes()
+    #draw_yboxes()
     if mousePressed:
         force_vals()
     #om.gray_scott()
     om.iter_wave()
-    for qf in om.qfaces:
-        #draw_fface(qf)
-        draw_qface(qf)
+    #for qf in om.qfaces:
+    #    draw_fface(qf)
+    for qf in om.sfaces:
+        draw_fface(qf)
+        #draw_qface(qf)
     popMatrix()
     # print cc3
+    if make_gif:
+        fname = "frames/f%03d.png" % frameCount
+        saveFrame(fname);
+
+def keyPressed():
+    global make_gif
+    if key == 'x':
+        make_gif = False
+        print "Done"
+    elif key == 'z':
+        make_gif = True
+        print "Writing"
+
+#use imagemagick to make gifs:  $convert  -delay 7 -loop 0 f*.png ani.gif
 
 def mouseClickedOLD():
     #global cindex
@@ -98,12 +118,12 @@ def force_vals():
         om.chan[cindex].V = 255
     
 
-def keyPressed():
-    global cindex
-    cindex = cindex + 1
-    println(cindex)
-    if cindex >= len(om.chan):
-        cindex = 0
+#def keyPressed():
+#    global cindex
+#    cindex = cindex + 1
+#   println(cindex)
+#    if cindex >= len(om.chan):
+#        cindex = 0
 
 def draw_vert(v):
     # for debugging, put a box at this vertex
@@ -136,8 +156,9 @@ def draw_fface(qf):
     for i, f in enumerate(qf.f):
     # draw this face in its proper color...
         #fill(color(f.U*255, 0, f.V*255));
-        sc = 2.0
-        fill(color(sc*f.V, 80, 255-(sc*f.V)));
+        sc = 0.15
+        colorMode(HSB,100)
+        fill(color(60-sc*f.V, 100, 80));
         beginShape(TRIANGLE_STRIP)
         for j in range(3):
             vertex(f.v[j].x, f.v[j].y, f.v[j].z)
