@@ -219,8 +219,10 @@ class Ommahard(Ommatid):
         self.boardmap = [ 'x'  for i in range(self.nfaces)]
         #print str(self.facemap)
         self.numLEDs = 80
-        # array of pixels
+        # array of pixels in *physical* order, (not logical)
         self.px = [ [0,0,0] ] * self.numLEDs
+        # tricksy here: no physical board 18 (out of 20) so remap board 19 channels to
+        # board 18
         self.set_HSVsphere(0)
         self.print_lats()
         self.init_cmap()
@@ -389,6 +391,19 @@ if __name__ == '__main__':
         print "loading from pickle"
         omma = pickle.load(open( "ommah.p", "rb" ) )
     
+
+    # ok, this is confusing AF but here goes: pixel output string and
+    # sensor input string are 1-D arrays in PHYSICAL order.  omma
+    # channels and faces are 1D arrays in LOGICAL order (basically in
+    # order of construction, which is kind of random. thus omma.chan
+    # is a 1D array ofchannels in logical order, ch.i is index into
+    # this (e.g. ch = omma.chan[3] then ch.i == 3)
+
+    # to map between them, we use chan_map and chan_imap dicts.
+    # PHYSICAL = log2phys[LOGICAL]
+    # LOGICAL  = phys2log[PHYSICAL]
+    # ch.i  == log2phys[ch.pi]
+    # ch.pi == phys2log[ch.i]
     
     # index of face to debug, indexed from a=0
     dface = -1
@@ -441,7 +456,6 @@ if __name__ == '__main__':
 
     board_lats = [[5],[0, 15, 16],[1,4,6,8,10,11],[2,3,12,14,17,19],[7,9,13]]
 
-    
     # inverse map of logical board map to physical board map
     # board_map[i] = b where i is physical address and b is logical address
     # that is, omma.qfaces[b] has physical address (face address) i. 
@@ -496,15 +510,15 @@ if __name__ == '__main__':
             qf = omma.qfaces[b]
             for n, ch in enumerate(qf.f):
                 ch.bm = b # board map, logical index
-                ch.pi = qf.i # actual physical board index 
-                ch.n = n # logical position on board
+                ch.l = n # physical position on board (0, 1, 2, 3: 0 is center)
             
     # for i in chan_map:
     #     ch = omma.chan[i]
-       #print "chan: %d bm: %d pi %d n%d lat: %f long: %f"  % (ch.i, ch.bm, ch.pi, ch.n, r2d(ch.lat), r2d(ch.lng))
+       #print "chan: %d bm: %d pi %d n%d lat: %f long: %f"  % (ch.i, ch.bm, ch.pi, ch.l, r2d(ch.lat), r2d(ch.lng))
         
     chan_map = {i:-1 for i in range(20)}
-
+    # lists of logical channel indices of channels at same latitude, in increasing latitude.
+    # each list ordered by min-to-max longitide (at same latitude)
     chan_lats = [[21],
                  [22, 20, 23],
                  [67, 2, 3, 63, 60, 66],
@@ -512,17 +526,18 @@ if __name__ == '__main__':
                  [32, 19, 6, 26,43, 46],
                  [64, 0, 62],
                  [33, 17, 5, 25, 41, 45],
-                 [47,35,16,4,27,42]]
+                 [47,35,16,4,27,42],
+                 [34, 18, 7, 24, 40, 44]]
     
-
-    print repr(chan_lats)
-    
+    # lats[0], top of sphere
     chan_map[21] = 0 
 
+    # lats[1], adjacent to top board
     chan_map[22] = 3 
     chan_map[20] = 1 
     chan_map[23] = 2
 
+    # lats[2]
     chan_map[67] = 29 
     chan_map[2]  = 6
     chan_map[3]  = 5
@@ -530,10 +545,12 @@ if __name__ == '__main__':
     chan_map[60] = 17
     chan_map[66] = 30 
 
+    # lats[3]
     chan_map[65]  = 28
     chan_map[1]   = 4
     chan_map[61]  = 16 
 
+    # lats[4]
     chan_map[32] = 33
     chan_map[19] = 37
     chan_map[6]  = 9
@@ -541,10 +558,12 @@ if __name__ == '__main__':
     chan_map[43] = 21
     chan_map[46] = 25
 
+    # lats[5]
     chan_map[64]  = 31
     chan_map[0]   = 7
     chan_map[62]  = 19 
 
+    # lats[6]
     chan_map[33] = 34
     chan_map[17] = 39
     chan_map[5]  = 10
@@ -552,32 +571,43 @@ if __name__ == '__main__':
     chan_map[41] = 22
     chan_map[45] = 27
 
-    chan_map[47] = 35
-    chan_map[35] = 38
-    chan_map[16] = 11
-    chan_map[4]  = 14
-    chan_map[27] = 23
-    chan_map[42] = 26
-    
+    # lats[7]
+    chan_map[47] = 32
+    chan_map[35] = 36
+    chan_map[16] = 8
+    chan_map[4]  = 12
+    chan_map[27] = 20
+    chan_map[42] = 24
+
+    # lats[8], bottom row on top half, just above equator
+    chan_map[34] = 35
+    chan_map[18] = 38
+    chan_map[7]  = 11
+    chan_map[24] = 14
+    chan_map[40] = 23
+    chan_map[44] = 26
+
     # bottom half: reverse longitude
+    #lats[9]
     chan_lats.append([59,76, 8, 12, 70, 50])
-    chan_map[59] = 68 
-    chan_map[76] = 60
-    chan_map[8]  = 56
-    chan_map[12] = 48
-    chan_map[70] = 44
-    chan_map[50] = 72
+    chan_map[59] = 71 
+    chan_map[76] = 62
+    chan_map[8]  = 59
+    chan_map[12] = 50
+    chan_map[70] = 47
+    chan_map[50] = 74
 
     chan_lats.append([48,56,79,10,15,71])
-    chan_map[48] = 71
-    chan_map[56] = 62
-    chan_map[79] = 59
-    chan_map[10] = 50
-    chan_map[15] = 47
-    chan_map[71] = 74
+    #lats[10]
+    chan_map[48] = 68
+    chan_map[56] = 60
+    chan_map[79] = 56
+    chan_map[10] = 48
+    chan_map[15] = 44
+    chan_map[71] = 72
 
     chan_lats.append([57,77, 9, 13, 69, 49])
-
+    # lats[11]
     chan_map[57] = 70
     chan_map[77] = 63
     chan_map[9]  = 58
@@ -586,11 +616,13 @@ if __name__ == '__main__':
     chan_map[49] = 75
 
     chan_lats.append([52, 30, 36])
+    # lats[12]
     chan_map[52] = 67
     chan_map[30] = 55
     chan_map[36] = 43
 
     chan_lats.append([58, 78, 11, 14, 68, 51])
+    # lats[13]
     chan_map[58] = 69
     chan_map[78] = 61
     chan_map[11] = 57
@@ -599,11 +631,13 @@ if __name__ == '__main__':
     chan_map[51] = 73
 
     chan_lats.append([29, 53, 37])
+    # lats[14]
     chan_map[29] = 64
     chan_map[53] = 52
     chan_map[37] = 40
 
     chan_lats.append([55,31, 28, 38, 39, 54])
+    # lats[15]
     chan_map[55] = 65
     chan_map[31] = 66
     chan_map[28] = 53
@@ -611,15 +645,25 @@ if __name__ == '__main__':
     chan_map[39] = 41
     chan_map[54] = 42
 
-    for c in range(76):
-        try:
-            i = chan_map[c]
-        except KeyError:
-            i = -1
-        if i >= 0:
-            ch = omma.chan[c]
-            ch.pi = i
-            print "chan: %d bm: %d pi %d n%d lat: %f long: %f"  % (ch.i, ch.bm, ch.pi, ch.n, r2d(ch.lat), r2d(ch.lng))
+    # logical board 18 (max latitude on bottom) is not physically
+    # present, map to dummy physical channel -1
+    # lats[16]
+    chan_map[72] = -1
+    chan_map[73] = -1
+    chan_map[74] = -1
+    chan_map[75] = -1
+
+    #for lat in chan_lats:
+    #    print "lat" + repr(lat)
+    
+
+    
+    log2phys = []
+    phys2log = []
+    for ch in omma.chan:
+        ch.pi = chan_map[ch.i]
+        log2phys.append(ch.pi)
+        #print "chan: %d pi %d lat: %f long: %f"  % (ch.i, ch.pi, r2d(ch.lat), r2d(ch.lng))
     
 
     #exit(0)
@@ -713,7 +757,8 @@ if __name__ == '__main__':
                     lat_count += 1
                     if lat_count >= len(chan_lats):
                         lat_count = 0
-                    print "lat count " + str(lat_count) 
+                    print "lat count " + str(lat_count)
+                    print "lats" + repr(chan_lats[lat_count])
                     #print str([c.lat for c in chan_lats[lat_count]])
                     lng_count = 0
                     print_hit = True
@@ -772,18 +817,18 @@ if __name__ == '__main__':
                 # sum rangemap for this face
                 fv = 0
                 for n, ch in enumerate(qf.f):
-                    c = ch.i
                     #print "ch %d %s" % (ch.i, n)
                     #pixels[c] = ch.c
-                    fv = float(rm[c])
+                    fv = float(rm[ch.pi])
                     if fv > 99:
+
                         print "chan:%02d face N:%02d face:%02d board: %s" % (ch.i,n,qf.i,omma.boardmap[qf.i])
-                        print "lat: %f long: %f" % (omma.chan[c].lat, omma.chan[c].lng)
-                        if redpix > -1:
-                            print "redpix %d, lat: %f long: %f" % (redpix, omma.chan[redpix].lat, omma.chan[redpix].lng)
-
-                        pixels[ch.i] = (255,255,255)
-
+                        print "lat: %f long: %f" % (omma.chan[i].lat, omma.chan[i].lng)
+                        pixels[ch.pi] = (255,255,255)
+                        for c in ch.n:
+                            if c.pi >=0:
+                                # if physical channel exists
+                                pixels[c.pi] = (0,0,255)
                         
 
         elif mode == 1 and False: # rgbW face triangles
