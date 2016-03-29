@@ -9,7 +9,11 @@ geomhack.py: first cut at using geometry from omma_geom
 import serial
 import sys
 import time
-import math
+
+
+from math import sin
+from math import cos
+from math import pi as PI
 
 import RPi.GPIO as GPIO
  
@@ -17,6 +21,8 @@ import opc
 
 import colorsys
 import random
+
+
 
 #from omma_geom import Vertex as vert
 from omma_geom import Ommatid
@@ -228,7 +234,7 @@ class Ommahard(Ommatid):
         self.init_cmap()
 
     def r2d(self,r):
-        return 180*r/math.pi
+        return 180*r/PI
 
     def print_lats(self):
          for qf in self.qfaces:
@@ -271,9 +277,9 @@ class Ommahard(Ommatid):
         # processing
         for c in self.chan:
             # hue -- floating [0-1]
-            hh = (c.ph + math.pi)/(2.0*math.pi)
+            hh = (c.ph + PI)/(2.0*PI)
             # brightness
-            bb = c.th/(math.pi) 
+            bb = c.th/(PI) 
             hh = hh + offset
             if hh > 1.0:
                 # wrap around
@@ -355,8 +361,21 @@ class Ommahard(Ommatid):
         return tuple(i * 255 for i in colorsys.hsv_to_rgb(h/255.0,s/255.0,v/255.0))
 
 def r2d(r):
-    return 180*r/math.pi
+    return 180*r/PI
 
+def rdist(lat1, lng1, lat2, lng2):
+    return(sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2)*cos(lng1 - lng2))
+
+def pchanll(ch):
+    print " pchan:%02d lat: %f lng %f" % (ch.i,ch.lat,ch.lng)
+    for cn in ch.n:
+        print "    pnabe:%02d lat: %f lng %f" % (cn.i,cn.lat,cn.lng)
+
+def pchan(ch, pi):
+    ch.pi = pi
+    print " pchan:%02d pi: %02d " % (ch.i, ch.pi)
+    for cn in ch.n:
+        print "     pnabe:%02d pi %02d" % (cn.i, cn.pi)
 
 if __name__ == '__main__':
     import kbhit
@@ -453,7 +472,7 @@ if __name__ == '__main__':
     lng_count = 0 # interactive count
     board_count0 = 0
     board_count1 = 0
-
+    chan_count =0
     board_lats = [[5],[0, 15, 16],[1,4,6,8,10,11],[2,3,12,14,17,19],[7,9,13]]
 
     # inverse map of logical board map to physical board map
@@ -496,11 +515,11 @@ if __name__ == '__main__':
     # invert board map such that ib[i] = b 
     # ib_map = {v: k for k, v in board_map.items()}
 
-    for i in range(19):
-        b = board_map[i]
-        qf = omma.qfaces[b]
-        qf.bm = b # board map
-        print "lb %2d i: %2d qf.i: %2d lat: %f lng %f " % (qf.bm, i, qf.i, r2d(qf.lat), r2d(qf.lng))
+    # for i in range(19):
+    #     b = board_map[i]
+    #     qf = omma.qfaces[b]
+    #     qf.bm = b # board map
+    #     print "lb %2d i: %2d qf.i: %2d lat: %f lng %f " % (qf.bm, i, qf.i, r2d(qf.lat), r2d(qf.lng))
 
     #print repr(ib_map)
     #print repr(board_map)
@@ -531,33 +550,61 @@ if __name__ == '__main__':
     
     # lats[0], top of sphere
     chan_map[21] = 0 
-
+    pchanll(omma.chan[21])
+    
     # lats[1], adjacent to top board
     chan_map[22] = 3 
+    pchan(omma.chan[22], 3)
     chan_map[20] = 1 
+    pchan(omma.chan[20], 1)
     chan_map[23] = 2
-
+    pchan(omma.chan[23], 2)
+    
     # lats[2]
     chan_map[67] = 29 
+    pchan(omma.chan[67], 29)
     chan_map[2]  = 6
+    pchan(omma.chan[2], 6)
     chan_map[3]  = 5
+    pchan(omma.chan[3], 5)
     chan_map[63] = 18
+    pchan(omma.chan[63], 18)
     chan_map[60] = 17
+    pchan(omma.chan[60], 17)
     chan_map[66] = 30 
-
-    # lats[3]
+    pchan(omma.chan[66], 30)
+    
+     # lats[3]
     chan_map[65]  = 28
+    pchan(omma.chan[65], 28)
     chan_map[1]   = 4
+    pchan(omma.chan[1], 4)
     chan_map[61]  = 16 
+    pchan(omma.chan[61], 16)
 
     # lats[4]
     chan_map[32] = 33
+    pchan(omma.chan[32], 33)
     chan_map[19] = 37
+    pchan(omma.chan[19], 37)
     chan_map[6]  = 9
+    pchan(omma.chan[6], 9)
     chan_map[26] = 13
+    pchan(omma.chan[26], 13)
     chan_map[43] = 21
+    pchan(omma.chan[43], 21)
     chan_map[46] = 25
+    pchan(omma.chan[46], 25)
 
+    for i in chan_lats[5]:
+        pchan(omma.chan[i],0)
+
+    for i in chan_lats[6]:
+        pchan(omma.chan[i],0)
+        
+    exit(0)
+
+    
     # lats[5]
     chan_map[64]  = 31
     chan_map[0]   = 7
@@ -759,7 +806,6 @@ if __name__ == '__main__':
                         lat_count = 0
                     print "lat count " + str(lat_count)
                     print "lats" + repr(chan_lats[lat_count])
-                    #print str([c.lat for c in chan_lats[lat_count]])
                     lng_count = 0
                     print_hit = True
                 elif c == 'm':
@@ -768,7 +814,14 @@ if __name__ == '__main__':
                     if lng_count >= len(chan_lats[lat_count]):
                         lng_count = 0
                     print "lng count " + str(lng_count)
-                    #print str([c.lng for c in chan_lats[lng_count]])
+                    ch = omma.chan[chan_lats[lat_count][lng_count]]
+                    print "chan:%02d pi: %d face:%02d" % (ch.i,ch.pi,qf.i)
+                    print "lat: %f long: %f" % (ch.lat, ch.lng)
+                    for cn in ch.n:
+                        print "  c-nabe:%02d pi: %d lat: %f lng %f" % (cn.i,cn.pi,cn.lat,cn.lng)
+                        #print "  rdist %f" % rdist(ch.lat, ch.lng, cn.lat,cn.lng)
+                        print "  edist %f" % ch.nv.dist2(cn.nv)
+
                 elif c == 'z':
                     print_hit = True
                     board_count0 += 1
@@ -786,50 +839,52 @@ if __name__ == '__main__':
                     qf = omma.qfaces[b]
                     print "b1: %2d i %2d b: %2d lng %f " % (board_count1, qf.i, b, r2d(qf.lng)) 
 
-            for c in omma.chan:
-                pixels[c.i] = (0,0,0)
+                elif c == 'v':
+                    chan_count += 1
+                    if chan_count >= len(omma.chan):
+                        chan_count = 0
+                    print "chan_count :" + str(chan_count)
+                    ch = omma.chan[chan_count]
+                    print " vchan:%02d pi: %02d lat: %f lng %f" % (ch.i,ch.pi,cn.lat,cn.lng)
+                    for cn in ch.n:
+                        if cn.pi >=0:
+                            print " vnabe:%02d pi: %02d lat: %f lng %f" % (cn.i,cn.pi,cn.lat,cn.lng)
+                            print "  edist %f" % ch.nv.dist2(cn.nv)                    
+            for ch in omma.chan:
+                pixels[ch.pi] = (0,0,0)
                 
-            # for b in board_lats[board_count0]:
-            #     qf = omma.qfaces[board_map[b]]
-            #     for n, ch in enumerate(qf.f):
-            #         pixels[ch.i] = (0,0,128)
-            #         if n == 0:
-            #             pixels[ch.i] = (0,128,128)
-            #         if n == 1:
-            #             pixels[ch.i] = (128,0,128)
+            for i in chan_lats[lat_count]:
+                ch = omma.chan[i]                
+                pixels[ch.pi] = (0,0,128)
 
-            # b = board_lats[board_count0][board_count1]
-            # qf = omma.qfaces[board_map[b]]
-            # for n, ch in enumerate(qf.f):
-            #     #pixels[ch.i] = (0,0,128)
-            #     if n == 0:
-            #         pixels[ch.i] = (255, 0 ,0)
+            i = chan_lats[lat_count][lng_count]
+            ch = omma.chan[i]
+            pixels[ch.pi] = (255, 0 ,0)
+            # for cn in ch.n:
+            #     if cn.pi >=0:
+            #         #print "nabe:%02d pi: %02d " % (cn.i, cn.pi)
+            #         # if physical channel exists
+            #         pixels[cn.pi] = (0,255,0)
+                
+            ch = omma.chan[chan_count]
+            if ch.pi >= 0:
+                pixels[ch.pi] = (0,255,0)
+                for cn in ch.n:
+                    if cn.pi >=0:
+                        #print "  c-nabe:%02d pi: %02d " % (cn.i, cn.pi)
+                        # if physical channel exists
+                        pixels[cn.pi] = (255,0,255)
 
-            for c in chan_lats[lat_count]:
-                ch = omma.chan[chan_map[c]]
-                pixels[ch.i] = (0,0,128)
-
-            c = chan_lats[lat_count][lng_count]
-            ch = omma.chan[chan_map[c]]
-            pixels[ch.i] = (255, 0 ,0)
-
-            for qf in omma.qfaces:
-                # sum rangemap for this face
-                fv = 0
-                for n, ch in enumerate(qf.f):
-                    #print "ch %d %s" % (ch.i, n)
-                    #pixels[c] = ch.c
-                    fv = float(rm[ch.pi])
-                    if fv > 99:
-
-                        print "chan:%02d face N:%02d face:%02d board: %s" % (ch.i,n,qf.i,omma.boardmap[qf.i])
-                        print "lat: %f long: %f" % (omma.chan[i].lat, omma.chan[i].lng)
-                        pixels[ch.pi] = (255,255,255)
-                        for c in ch.n:
-                            if c.pi >=0:
-                                # if physical channel exists
-                                pixels[c.pi] = (0,0,255)
-                        
+            for ch in omma.chan:
+                fv = float(rm[ch.pi])
+                if fv > 99:
+                    print "touch:%02d pi: %d face:%02d" % (ch.i,ch.pi,qf.i)
+                    print "lat: %f long: %f" % (ch.lat, ch.lng)
+                    pixels[ch.pi] = (255,255,255)
+                    for cn in ch.n:
+                        print "  t-nabe:%02d pi: %d lat: %f lng %f" % (cn.i,cn.pi,cn.lat,cn.lng)
+                        if cn.pi >=0:
+                            pixels[cn.pi] = (0,255,0)
 
         elif mode == 1 and False: # rgbW face triangles
             for qf in omma.qfaces:

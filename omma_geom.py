@@ -139,7 +139,8 @@ class subFace:
         self.n = []
         # unique numerical index (added later)
         self.i = None
-
+        # physical channel address
+        self.pi = -1
         # reaction-diffusion coefficients
         self.rc = RDConstants()
 
