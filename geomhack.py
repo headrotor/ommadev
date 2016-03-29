@@ -367,15 +367,21 @@ def rdist(lat1, lng1, lat2, lng2):
     return(sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2)*cos(lng1 - lng2))
 
 def pchanll(ch):
-    print " pchan:%02d lat: %f lng %f" % (ch.i,ch.lat,ch.lng)
+    print " pchan:%02d lat: %4.1f lng %4.1f" % (ch.i,r2d(ch.lat),r2d(ch.lng))
     for cn in ch.n:
-        print "    pnabe:%02d lat: %f lng %f" % (cn.i,cn.lat,cn.lng)
+        print "    pnabe:%02d lat: %4.1f lng %4.1f" % (cn.i,r2d(cn.lat),r2d(cn.lng))
 
-def pchan(ch, pi):
+def pchanpi(ch, pi):
     ch.pi = pi
     print " pchan:%02d pi: %02d " % (ch.i, ch.pi)
     for cn in ch.n:
         print "     pnabe:%02d pi %02d" % (cn.i, cn.pi)
+
+def pchan(ch, pi):
+    ch.pi = pi
+    print " pchan:%02d" % (ch.i)
+    for cn in ch.n:
+        print "     pnabe:%02d " % (cn.i)
 
 if __name__ == '__main__':
     import kbhit
@@ -554,85 +560,105 @@ if __name__ == '__main__':
     
     # lats[1], adjacent to top board
     chan_map[22] = 3 
-    pchan(omma.chan[22], 3)
+    #pchan(omma.chan[22], 3)
     chan_map[20] = 1 
-    pchan(omma.chan[20], 1)
+    #pchan(omma.chan[20], 1)
     chan_map[23] = 2
-    pchan(omma.chan[23], 2)
+    #pchan(omma.chan[23], 2)
     
     # lats[2]
     chan_map[67] = 29 
-    pchan(omma.chan[67], 29)
+    #pchan(omma.chan[67], 29)
     chan_map[2]  = 6
-    pchan(omma.chan[2], 6)
+    #pchan(omma.chan[2], 6)
     chan_map[3]  = 5
-    pchan(omma.chan[3], 5)
+    #pchan(omma.chan[3], 5)
     chan_map[63] = 18
-    pchan(omma.chan[63], 18)
+    #pchan(omma.chan[63], 18)
     chan_map[60] = 17
-    pchan(omma.chan[60], 17)
+    #pchan(omma.chan[60], 17)
     chan_map[66] = 30 
-    pchan(omma.chan[66], 30)
+    #pchan(omma.chan[66], 30)
     
      # lats[3]
     chan_map[65]  = 28
-    pchan(omma.chan[65], 28)
+    #pchan(omma.chan[65], 28)
     chan_map[1]   = 4
-    pchan(omma.chan[1], 4)
+    #pchan(omma.chan[1], 4)
     chan_map[61]  = 16 
-    pchan(omma.chan[61], 16)
+    #pchan(omma.chan[61], 16)
 
     # lats[4]
     chan_map[32] = 33
-    pchan(omma.chan[32], 33)
+    #pchan(omma.chan[32], 33)
     chan_map[19] = 37
-    pchan(omma.chan[19], 37)
+    #pchan(omma.chan[19], 37)
     chan_map[6]  = 9
-    pchan(omma.chan[6], 9)
+    #pchan(omma.chan[6], 9)
     chan_map[26] = 13
-    pchan(omma.chan[26], 13)
+    #pchan(omma.chan[26], 13)
     chan_map[43] = 21
-    pchan(omma.chan[43], 21)
+    #pchan(omma.chan[43], 21)
     chan_map[46] = 25
-    pchan(omma.chan[46], 25)
+    #pchan(omma.chan[46], 25)
 
-    for i in chan_lats[5]:
-        pchan(omma.chan[i],0)
-
-    for i in chan_lats[6]:
-        pchan(omma.chan[i],0)
+    for lats in chan_lats:
+        for i in lats:
+            pchanll(omma.chan[i])
         
-    exit(0)
-
+    #exit(0)
     
     # lats[5]
     chan_map[64]  = 31
     chan_map[0]   = 7
     chan_map[62]  = 19 
 
-    # lats[6]
-    chan_map[33] = 34
-    chan_map[17] = 39
-    chan_map[5]  = 10
-    chan_map[25] = 15
-    chan_map[41] = 22
-    chan_map[45] = 27
+    # # lats[6]
+    # chan_map[33] = 34
+    # chan_map[17] = 39
+    # chan_map[5]  = 10
+    # chan_map[25] = 15
+    # chan_map[41] = 22
+    # chan_map[45] = 27
+
+    # # lats[7]
+    # chan_map[47] = 32
+    # chan_map[35] = 36
+    # chan_map[16] = 8
+    # chan_map[4]  = 12
+    # chan_map[27] = 20
+    # chan_map[42] = 24
+
+    chan_map[33] = 32
+    chan_map[17] = 36
+    chan_map[5]  = 8
+    chan_map[25] = 12
+    chan_map[41] = 20
+    chan_map[45] = 24
 
     # lats[7]
-    chan_map[47] = 32
-    chan_map[35] = 36
-    chan_map[16] = 8
-    chan_map[4]  = 12
-    chan_map[27] = 20
-    chan_map[42] = 24
+    chan_map[47] = 27
+    chan_map[35] = 34
+    chan_map[16] = 39
+    chan_map[4]  = 10
+    chan_map[27] = 15
+    chan_map[42] = 21
 
     # lats[8], bottom row on top half, just above equator
+    # chan_map[34] = 35
+    # chan_map[18] = 38
+    # chan_map[7]  = 11
+    # chan_map[24] = 14
+    # chan_map[40] = 23
+    # chan_map[44] = 26
+
     chan_map[34] = 35
     chan_map[18] = 38
     chan_map[7]  = 11
     chan_map[24] = 14
     chan_map[40] = 23
     chan_map[44] = 26
+
 
     # bottom half: reverse longitude
     #lats[9]
@@ -886,22 +912,10 @@ if __name__ == '__main__':
                         if cn.pi >=0:
                             pixels[cn.pi] = (0,255,0)
 
-        elif mode == 1 and False: # rgbW face triangles
-            for qf in omma.qfaces:
-                # sum rangemap for this face
-                fv = 0
-                for n, ch in enumerate(qf.f):
-                    c = ch.i
-                    #print "ch %d %s" % (ch.i, n)
-                    #pixels[c] = ch.c
-                    fv += float(rm[c])
-                fv = int(fv/3)
-                if fv < 10:
-                    fv = 0
-                pixels[4*qf.i + 0] = (0, fv, 0)
-                pixels[4*qf.i + 1] = (fv, 0,  0)
-                pixels[4*qf.i + 2] = (0, 0, fv)
-                pixels[4*qf.i + 3] = (0, 0, fv)
+        elif mode == 1: # rgbW face triangles
+
+            for ch in omma.chan:
+                pixels[ch.pi] = (0,0,0)
 
                 # for n, ch in enumerate(qf.f):
                 #     c = ch.i
