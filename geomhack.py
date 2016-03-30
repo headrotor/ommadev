@@ -367,18 +367,16 @@ def rdist(lat1, lng1, lat2, lng2):
     return(sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2)*cos(lng1 - lng2))
 
 def pchanll(ch):
-    print " pchan:%02d lat: %4.1f lng %4.1f" % (ch.i,r2d(ch.lat),r2d(ch.lng))
+    print " pchan:%02d pi: %d lat: %4.1f lng %4.1f" % (ch.i, ch.pi, r2d(ch.lat),r2d(ch.lng))
     for cn in ch.n:
-        print "    pnabe:%02d lat: %4.1f lng %4.1f" % (cn.i,r2d(cn.lat),r2d(cn.lng))
+        print "    pnabe:%02d pi:%d lat: %4.1f lng %4.1f" % (cn.i, ch.pi, r2d(cn.lat),r2d(cn.lng))
 
-def pchanpi(ch, pi):
-    ch.pi = pi
+def pchanpi(ch):
     print " pchan:%02d pi: %02d " % (ch.i, ch.pi)
     for cn in ch.n:
         print "     pnabe:%02d pi %02d" % (cn.i, cn.pi)
 
 def pchan(ch):
-    ch.pi = pi
     print " pchan:%02d" % (ch.i)
     for cn in ch.n:
         print "     pnabe:%02d " % (cn.i)
@@ -485,36 +483,36 @@ if __name__ == '__main__':
     # board_map[i] = b where i is physical address and b is logical address
     # that is, omma.qfaces[b] has physical address (face address) i. 
 
-    board_map = {i:-1 for i in range(20)}
+    # board_map = {i:-1 for i in range(20)}
 
-    # top board
-    board_map[5] = 0
+    # # top board
+    # board_map[5] = 0
 
-    #top ring of three
-    board_map[0] = 7
-    board_map[15] = 1
-    board_map[16] = 4
+    # #top ring of three
+    # board_map[0] = 7
+    # board_map[15] = 1
+    # board_map[16] = 4
 
-    #upper ring of six
-    board_map[1]  = 8
-    board_map[4]  = 9
-    board_map[6]  = 2
-    board_map[8]  = 3
-    board_map[10] = 5
-    board_map[11] = 6
+    # #upper ring of six
+    # board_map[1]  = 8
+    # board_map[4]  = 9
+    # board_map[6]  = 2
+    # board_map[8]  = 3
+    # board_map[10] = 5
+    # board_map[11] = 6
 
-    #lower ring of six
-    board_map[2]  = 17
-    board_map[3]  = 15
-    board_map[12] = 14
-    board_map[14] = 12
-    board_map[17] = 11
-    board_map[19] = 18
+    # #lower ring of six
+    # board_map[2]  = 17
+    # board_map[3]  = 15
+    # board_map[12] = 14
+    # board_map[14] = 12
+    # board_map[17] = 11
+    # board_map[19] = 18
 
-    # bottom ring of three
-    board_map[7]  = 16
-    board_map[9]  = 13
-    board_map[13] = 10
+    # # bottom ring of three
+    # board_map[7]  = 16
+    # board_map[9]  = 13
+    # board_map[13] = 10
     
     # bottom board 18 is not used
 
@@ -556,7 +554,6 @@ if __name__ == '__main__':
     
     # lats[0], top of sphere
     chan_map[21] = 0 
-    pchanll(omma.chan[21])
     
     # lats[1], adjacent to top board
     chan_map[22] = 3 
@@ -604,22 +601,7 @@ if __name__ == '__main__':
     chan_map[0]   = 7
     chan_map[62]  = 19 
 
-    # # lats[6]
-    # chan_map[33] = 34
-    # chan_map[17] = 39
-    # chan_map[5]  = 10
-    # chan_map[25] = 15
-    # chan_map[41] = 22
-    # chan_map[45] = 27
-
-    # # lats[7]
-    # chan_map[47] = 32
-    # chan_map[35] = 36
-    # chan_map[16] = 8
-    # chan_map[4]  = 12
-    # chan_map[27] = 20
-    # chan_map[42] = 24
-
+    # lats[6]
     chan_map[33] = 32
     chan_map[17] = 36
     chan_map[5]  = 8
@@ -633,7 +615,7 @@ if __name__ == '__main__':
     chan_map[16] = 39
     chan_map[4]  = 10
     chan_map[27] = 15
-    chan_map[42] = 21
+    chan_map[42] = 22
 
     # lats[8], bottom row on top half, just above equator
     # chan_map[34] = 35
@@ -655,10 +637,10 @@ if __name__ == '__main__':
     #lats[9]
     chan_lats.append([59,76, 8, 12, 70, 50])
     chan_map[59] = 47 
-    chan_map[76] = 62
+    chan_map[76] = 50
     chan_map[8]  = 59
     chan_map[12] = 62
-    chan_map[70] = 35
+    chan_map[70] = 71
     chan_map[50] = 74
 
     chan_lats.append([48,56,79,10,15,71])
@@ -697,16 +679,16 @@ if __name__ == '__main__':
     chan_lats.append([29, 53, 37])
     # lats[14]
     chan_map[29] = 52
-    chan_map[53] = 37
-    chan_map[37] = 40
+    chan_map[53] = 40
+    chan_map[37] = 64
 
     chan_lats.append([55,31, 28, 38, 39, 54])
-    # lats[15] ##FIXME
-    chan_map[55] = 65
-    chan_map[31] = 66
+    # lats[15] #
+    chan_map[55] = 41
+    chan_map[31] = 54
     chan_map[28] = 53
-    chan_map[38] = 54
-    chan_map[39] = 41
+    chan_map[38] = 66
+    chan_map[39] = 65
     chan_map[54] = 42
 
     # logical board 18 (max latitude on bottom) is not physically
@@ -725,14 +707,23 @@ if __name__ == '__main__':
     #         pchanll(omma.chan[i])
         
     
-
-
+    #invert chan map such that ichan[i] = pi 
+    ichan_map = {v: k for k, v in chan_map.items()}
+    
     for ch in omma.chan:
         pchanll(ch)
         ch.pi = chan_map[ch.i]
         #log2phys.append(ch.pi)
         #print "chan: %d pi %d lat: %f long: %f"  % (ch.i, ch.pi, r2d(ch.lat), r2d(ch.lng))
-    
+
+    for k, v in chan_map.items():
+        print "i: %d pi: %d" % (k,v)
+
+    for k, v in ichan_map.items():
+        print "pi-i: %d i-i: %d" % (k,v)
+
+
+
     while(True):
         # one method: subtract mean of "off" channels
         # these are good
@@ -873,11 +864,11 @@ if __name__ == '__main__':
                 
             for i in chan_lats[lat_count]:
                 ch = omma.chan[i]                
-                pixels[ch.pi] = (0,0,128)
+                #pixels[ch.pi] = (0,0,128)
 
             i = chan_lats[lat_count][lng_count]
             ch = omma.chan[i]
-            pixels[ch.pi] = (255, 0 ,0)
+            #pixels[ch.pi] = (255, 0 ,0)
             # for cn in ch.n:
             #     if cn.pi >=0:
             #         #print "nabe:%02d pi: %02d " % (cn.i, cn.pi)
@@ -886,24 +877,23 @@ if __name__ == '__main__':
                 
             ch = omma.chan[chan_count]
             if ch.pi >= 0:
-                pixels[ch.pi] = (0,255,0)
+                #pixels[ch.pi] = (0,255,0)
                 for cn in ch.n:
                     if cn.pi >=0:
                         #print "  c-nabe:%02d pi: %02d " % (cn.i, cn.pi)
                         # if physical channel exists
-                        pixels[cn.pi] = (255,0,255)
-
+                        #pixels[cn.pi] = (255,0,255)
+                        pass
             for ch in omma.chan:
                 fv = float(rm[ch.pi])
                 if fv > 40:
-                    print "touch:%02d pi: %d face:%02d" % (ch.i,ch.pi,qf.i)
-                    print "lat: %f long: %f" % (ch.lat, ch.lng)
-                    pixels[ch.pi] = (255,255,255)
+                    pchanll(ch)
+                    pixels[ch.pi] = (255,0,0)
                     for cn in ch.n:
-                        print "  t-nabe:%02d pi: %d lat: %f lng %f" % (cn.i,cn.pi,cn.lat,cn.lng)
+                        #print "  t-nabe:%02d pi: %d lat: %f lng %f" % (cn.i,cn.pi,cn.lat,cn.lng)
                         if cn.pi >=0:
                             pixels[cn.pi] = (0,255,0)
-
+                            
         elif mode == 1: # rgbW face triangles
 
             for ch in omma.chan:
