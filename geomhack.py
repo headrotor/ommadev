@@ -377,7 +377,7 @@ def pchanpi(ch, pi):
     for cn in ch.n:
         print "     pnabe:%02d pi %02d" % (cn.i, cn.pi)
 
-def pchan(ch, pi):
+def pchan(ch):
     ch.pi = pi
     print " pchan:%02d" % (ch.i)
     for cn in ch.n:
@@ -560,11 +560,8 @@ if __name__ == '__main__':
     
     # lats[1], adjacent to top board
     chan_map[22] = 3 
-    #pchan(omma.chan[22], 3)
     chan_map[20] = 1 
-    #pchan(omma.chan[20], 1)
     chan_map[23] = 2
-    #pchan(omma.chan[23], 2)
     
     # lats[2]
     chan_map[67] = 29 
@@ -602,12 +599,6 @@ if __name__ == '__main__':
     chan_map[46] = 25
     #pchan(omma.chan[46], 25)
 
-    for lats in chan_lats:
-        for i in lats:
-            pchanll(omma.chan[i])
-        
-    #exit(0)
-    
     # lats[5]
     chan_map[64]  = 31
     chan_map[0]   = 7
@@ -663,54 +654,54 @@ if __name__ == '__main__':
     # bottom half: reverse longitude
     #lats[9]
     chan_lats.append([59,76, 8, 12, 70, 50])
-    chan_map[59] = 71 
+    chan_map[59] = 47 
     chan_map[76] = 62
     chan_map[8]  = 59
-    chan_map[12] = 50
-    chan_map[70] = 47
+    chan_map[12] = 62
+    chan_map[70] = 35
     chan_map[50] = 74
 
     chan_lats.append([48,56,79,10,15,71])
     #lats[10]
-    chan_map[48] = 68
-    chan_map[56] = 60
-    chan_map[79] = 56
-    chan_map[10] = 48
-    chan_map[15] = 44
-    chan_map[71] = 72
+    chan_map[48] = 75
+    chan_map[56] = 46
+    chan_map[79] = 51
+    chan_map[10] = 58
+    chan_map[15] = 63
+    chan_map[71] = 70
 
     chan_lats.append([57,77, 9, 13, 69, 49])
     # lats[11]
-    chan_map[57] = 70
-    chan_map[77] = 63
-    chan_map[9]  = 58
-    chan_map[13] = 51
-    chan_map[69] = 46
-    chan_map[49] = 75
+    chan_map[57] = 44
+    chan_map[77] = 48
+    chan_map[9]  = 56
+    chan_map[13] = 60
+    chan_map[69] = 68
+    chan_map[49] = 72
 
     chan_lats.append([52, 30, 36])
     # lats[12]
-    chan_map[52] = 67
+    chan_map[52] = 43
     chan_map[30] = 55
-    chan_map[36] = 43
+    chan_map[36] = 67
 
     chan_lats.append([58, 78, 11, 14, 68, 51])
     # lats[13]
-    chan_map[58] = 69
-    chan_map[78] = 61
+    chan_map[58] = 45
+    chan_map[78] = 49
     chan_map[11] = 57
-    chan_map[14] = 49
-    chan_map[68] = 45
+    chan_map[14] = 61
+    chan_map[68] = 69
     chan_map[51] = 73
 
     chan_lats.append([29, 53, 37])
     # lats[14]
-    chan_map[29] = 64
-    chan_map[53] = 52
+    chan_map[29] = 52
+    chan_map[53] = 37
     chan_map[37] = 40
 
     chan_lats.append([55,31, 28, 38, 39, 54])
-    # lats[15]
+    # lats[15] ##FIXME
     chan_map[55] = 65
     chan_map[31] = 66
     chan_map[28] = 53
@@ -728,19 +719,20 @@ if __name__ == '__main__':
 
     #for lat in chan_lats:
     #    print "lat" + repr(lat)
+
+    # for lats in chan_lats:
+    #     for i in lats:
+    #         pchanll(omma.chan[i])
+        
     
 
-    
-    log2phys = []
-    phys2log = []
+
     for ch in omma.chan:
+        pchanll(ch)
         ch.pi = chan_map[ch.i]
-        log2phys.append(ch.pi)
+        #log2phys.append(ch.pi)
         #print "chan: %d pi %d lat: %f long: %f"  % (ch.i, ch.pi, r2d(ch.lat), r2d(ch.lng))
     
-
-    #exit(0)
-        
     while(True):
         # one method: subtract mean of "off" channels
         # these are good
@@ -903,7 +895,7 @@ if __name__ == '__main__':
 
             for ch in omma.chan:
                 fv = float(rm[ch.pi])
-                if fv > 99:
+                if fv > 40:
                     print "touch:%02d pi: %d face:%02d" % (ch.i,ch.pi,qf.i)
                     print "lat: %f long: %f" % (ch.lat, ch.lng)
                     pixels[ch.pi] = (255,255,255)
