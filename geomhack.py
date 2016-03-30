@@ -275,11 +275,11 @@ class Ommahard(Ommatid):
         """ color chan according to HSV, map longitude to hue,
         latitude to saturation. Subclass of ommatid """     
         # processing
-        for c in self.chan:
+        for ch in self.chan:
             # hue -- floating [0-1]
-            hh = (c.ph + PI)/(2.0*PI)
+            hh = (ch.ph + PI)/(2.0*PI)
             # brightness
-            bb = c.th/(PI) 
+            bb = ch.th/(PI) 
             hh = hh + offset
             if hh > 1.0:
                 # wrap around
@@ -290,9 +290,25 @@ class Ommahard(Ommatid):
             # else:
             #     c.c = colorsys.hsv_to_rgb(hh,100,bb)
 
-            c.c = colorsys.hsv_to_rgb(hh,1.0,bb)
+            ch.c = [255 * n for n in colorsys.hsv_to_rgb(hh,1.0,bb)]
 
 
+    def m255(self, val):
+        """map -1 to +1 sinusoidal range to 0-255"""
+        return(int(127.5*(val + 1)))
+
+    def sph_harm(self,lat_order,lng_order, lat_offset=0, lng_offset=0):
+        # display spherical harmonics on the sphere
+        for ch in self.chan:
+            lat_val = sin(2*lat_order*ch.lat + lat_offset)
+            lng_val = sin(lng_order*ch.lng + lng_offset)
+            ch.c = (0,self.m255(lat_val),self.m255(lng_val))
+
+    def constant(self, r, g, b):
+        # set color to a constant
+        for ch in self.chan:
+            ch.c = (r, g, b)
+            
         
     def swoop(self,speed=1.0,color=(1.0,1.0,1.0)):
         # swoop brightness up and down over the given number of seconds
@@ -618,13 +634,6 @@ if __name__ == '__main__':
     chan_map[42] = 22
 
     # lats[8], bottom row on top half, just above equator
-    # chan_map[34] = 35
-    # chan_map[18] = 38
-    # chan_map[7]  = 11
-    # chan_map[24] = 14
-    # chan_map[40] = 23
-    # chan_map[44] = 26
-
     chan_map[34] = 35
     chan_map[18] = 38
     chan_map[7]  = 11
@@ -728,8 +737,10 @@ if __name__ == '__main__':
         # one method: subtract mean of "off" channels
         # these are good
 
-        omma.set_HSVsphere(phase_advance)        
-        phase_advance += 0.05
+        #omma.set_HSVsphere(phase_advance)        
+        #omma.sph_harm(2,2,phase_advance, phase_advance)
+        omma.constant(0,0,0)
+        phase_advance += 0.1
         g = 0 # global index
         for f in faces:
 
@@ -860,7 +871,7 @@ if __name__ == '__main__':
                             print " vnabe:%02d pi: %02d lat: %f lng %f" % (cn.i,cn.pi,cn.lat,cn.lng)
                             print "  edist %f" % ch.nv.dist2(cn.nv)                    
             for ch in omma.chan:
-                pixels[ch.pi] = (0,0,0)
+                pixels[ch.pi] = ch.c
                 
             for i in chan_lats[lat_count]:
                 ch = omma.chan[i]                
