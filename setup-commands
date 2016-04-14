@@ -1,0 +1,57 @@
+
+#change password
+sudo passwd pi
+
+sudo rm /etc/ssh/ssh_host_* && sudo dpkg-reconfigure openssh-server
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install subversion emacs24 python-dev python-rpi.gpio tightvncserver 
+
+# configure vnc server http://gettingstartedwithraspberrypi.tumblr.com/post/24142374137/setting-up-a-vnc-server
+tightvncserver
+vncserver :1 -geometry 1024x728 -depth 24
+
+
+# configure static IP http://elinux.org/RPi_Setting_up_a_static_IP_in_Debian
+sudo emacs /etc/network/interfaces
+/etc/init.d/networking restart
+
+#change password
+sudo passwd pi
+
+# install svn repository
+mkdir omma
+svn co https://192.168.1.99/svn/rpi omma
+
+
+# install fadecandy server
+#https://learn.adafruit.com/1500-neopixel-led-curtain-with-raspberry-pi-fadecandy/fadecandy-server-setup
+
+git clone git://github.com/scanlime/fadecandy
+cd fadecandy/server
+make submodules
+make
+sudo cp fcserver /usr/local/bin
+sudo cp /home/pi/omma/fcserver.json /usr/local/bin/
+
+
+# install bluetooth keyboard dongle
+#
+sudo apt-get install bluez python-gobject blueman
+
+hcitool dev
+http://elinux.org/RPi_Bluetooth_keyboard_setup
+sudo bluetoothctl
+#(Turns out not to work from CLI because keb generates new passcode, suing blueman)
+
+# Make things start up
+# sudo emacs /etc/rc.local
+# Just above the final “exit 0” line, copy and paste the following:
+# /usr/local/bin/fcserver /usr/local/bin/fcserver.json >/var/log/fcserver.log 2>&1 &
+
+# make fadecandy controller auto-start (above) and make process autostart:
+
+
+
+
+
